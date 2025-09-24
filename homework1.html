@@ -1,0 +1,532 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Mamun — Single-file Portfolio</title>
+  <meta name="description" content="Single-file portfolio demo: semantic markup, accessibility, CSS variables, responsive layout, form validation.">
+
+  <!-- Goog le        font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+  <!-- Small  ... (data URI) -->
+  <link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%23264653'/><text x='50' y='57' font-size='40' text-anchor='middle' fill='%23fff' font-family='Poppins'>M</text></svg>">
+  <!-- i had some problem about connect to the page to each other
+     
+   i gave resposive to the page 
+   to  connect each page to another page 
+    
+   and i took some help from AI 
+     
+  
+  -->
+  <style>
+    /* 
+       Design system  and   reset
+        */
+    :root{
+      --bg:#f7fafc;
+      --text:#1f2937;
+      --primary:#2a9d8f;
+      --accent:#264653;
+      --muted:#6b7280;
+      --focus:#f6c90e;
+      --radius:12px;
+      --gap:1rem;
+      --container:1100px;
+      --ff: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{font-family:var(--ff);margin:0;background:var(--bg);color:var(--text);line-height:1.5}
+
+    /* skip link */
+    .skip-link{position:absolute;left:-999px;background:var(--primary);color:#fff;padding:0.5rem;border-radius:6px;z-index:999}
+    .skip-link:focus{left:1rem;top:1rem}
+
+    .container{max-width:var(--container);margin:0 auto;padding:1rem}
+
+    /* header  or  nav (flex) */
+    header{background:var(--accent);color:#fff}
+    .header-inner{display:flex;align-items:center;justify-content:space-between;gap:var(--gap);padding:0.75rem 1rem}
+    .logo{color:#fff;text-decoration:none;font-weight:600}
+    nav ul{list-style:none;margin:0;padding:0;display:flex;gap:0.5rem;align-items:center}
+    nav a{color:#fff;text-decoration:none;padding:0.45rem 0.6rem;border-radius:6px}
+    nav a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+    /* main layout */
+    main{padding:1.5rem 0}
+    .page{display:block}
+    /* JS will set [hidden] on non-active pages. Use hidden to hide visually and for assistive tech */
+    [hidden]{display:none!important}
+
+    /* hero */
+    .hero{background:linear-gradient(180deg,var(--primary), rgba(42,157,143,0.9));color:#fff;border-radius:12px;padding:2.25rem;text-align:center}
+    .hero h1{margin:0 0 0.5rem}
+    .lead{max-width:720px;margin:0.5rem auto 0;color:#e6fcf5}
+    .btn{display:inline-block;background:var(--accent);color:#fff;padding:0.6rem 0.9rem;border-radius:8px;text-decoration:none;font-weight:600}
+
+    /* cards - flex on small screens */
+    .cards{display:flex;flex-wrap:wrap;gap:var(--gap);justify-content:center;margin-top:1.25rem}
+    .card{background:#fff;border-radius:10px;padding:1rem;box-shadow:0 6px 18px rgba(10,10,10,0.06);max-width:320px;flex:1 1 260px;display:flex;flex-direction:column;gap:0.5rem}
+    .card .img-wrap{height:160px;border-radius:8px;overflow:hidden;background:#eefaf7;display:flex;align-items:center;justify-content:center}
+
+    /* Inline SVGs scale naturally */
+    svg.icon{width:100%;height:100%;display:block}
+
+    /* projects grid - min 2 columns on tablet, 3+ on desktop */
+    .grid{display:grid;grid-template-columns:repeat(1,1fr);gap:1rem;margin-top:1rem}
+    @media(min-width:640px){.grid{grid-template-columns:repeat(2,1fr)}}
+    @media(min-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+
+    /* breadcrumb */
+    .breadcrumb{margin:0.75rem 0}
+    .breadcrumb ol{list-style:none;display:flex;gap:0.5rem;padding:0;margin:0;align-items:center}
+    .breadcrumb a{color:var(--accent);text-decoration:none}
+    .breadcrumb li+li:before{content:"›";color:var(--muted);margin:0 0.5rem}
+
+    /* blog posts */
+    .post{background:#fff;padding:1rem;border-radius:10px;margin-bottom:1rem;box-shadow:0 6px 18px rgba(10,10,10,0.04)}
+    .post-meta{color:var(--muted);font-size:0.9rem}
+
+    /* table */
+    .table-wrap{overflow:auto;border-radius:8px}
+    table{width:100%;border-collapse:collapse;background:#fff}
+    caption{text-align:left;padding:0.75rem;font-weight:600}
+    thead th, tbody td{padding:0.75rem;border-top:1px solid #edf2f7}
+    tbody tr:nth-child(even){background:#fbfdfe}
+    th[scope="col"]{text-align:left}
+
+    /*  small screens */
+    @media(max-width:720px){
+      thead{display:none}
+      tbody tr{display:block;margin-bottom:0.75rem;border:1px solid #eef2f7;border-radius:8px;padding:0.5rem}
+      tbody td{display:flex;justify-content:space-between;padding:0.5rem 0}
+      tbody td::before{content:attr(data-label);font-weight:600;color:var(--muted);margin-right:1rem}
+    }
+
+    /* form */
+    form{background:#fff;padding:1rem;border-radius:12px;max-width:780px;box-shadow:0 6px 18px rgba(10,10,10,0.05);display:grid;gap:0.5rem}
+    label{font-weight:600}
+    input[type="text"],input[type="email"],input[type="tel"],select,textarea{padding:0.6rem;border-radius:8px;border:1px solid #d1d5db;font-size:1rem}
+    textarea{min-height:140px;resize:vertical}
+    input:focus,textarea:focus,select:focus{outline:3px solid var(--focus);outline-offset:3px}
+
+    /* field error placeholders hidden by default, shown when input is :invalid */
+    .field-error{display:none;color:#b91c1c;font-size:0.9rem}
+    input:invalid + .field-error,
+    textarea:invalid + .field-error,
+    select:invalid + .field-error{display:block}
+
+    /* consent row */
+    .consent{display:flex;gap:0.5rem;align-items:center}
+
+   
+    footer{background:var(--accent);color:#fff;padding:1rem;margin-top:2rem}
+    .footer-inner{display:flex;justify-content:space-between;gap:1rem;align-items:center;flex-wrap:wrap}
+    .footer-inner a{color:#fff;text-decoration:none}
+
+    /* focus visible for many interactive elements */
+    a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+
+    /* small screen nav positioning */
+    @media(max-width:860px){.header-inner{flex-direction:column;align-items:flex-start}}
+
+  </style>
+</head>
+<body>
+
+  
+  <a class="skip-link" href="#main">Skip to content</a>
+
+  
+  <header role="banner">
+    <div class="container header-inner">
+      <a class="logo" href="#home">Mamun</a>
+      <nav role="navigation" aria-label="Main navigation">
+        <ul class="nav-list">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#blog">Blog</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  
+  <main id="main" tabindex="-1">
+
+    <!-- HOME -->
+    <section id="home" class="page" role="region" aria-labelledby="home-title">
+      <div class="container">
+        <header class="hero" aria-hidden="false">
+          <h1 id="home-title">Hi — I'm Mamun</h1>
+          <p class="lead">Computer Science student, developer and UI/UX enthusiast. I build accessible, responsive web experiences.</p>
+          <p><a class="btn" href="#projects">See Projects</a></p>
+        </header>
+
+        <section aria-labelledby="what-i-do">
+          <h2 id="what-i-do" class="visually-hidden">What I do</h2>
+          <div class="cards" role="list">
+
+            <article class="card" role="listitem">
+              <div class="img-wrap">
+                ->
+                <svg class="icon" viewBox="0 0 600 360" role="img" aria-labelledby="svg-code">
+                  <title id="svg-code">Laptop screen with code editor</title>
+                  <rect width="100%" height="100%" fill="#e6f7f4"></rect>
+                  <rect x="40" y="40" width="520" height="220" rx="8" fill="#fff"></rect>
+                  <text x="300" y="160" text-anchor="middle" font-size="32" fill="#264653" font-family="Poppins">Code</text>
+                </svg>
+              </div>
+              <h3>Web Development</h3>
+              <p>Responsive, semantic and accessible front-end using HTML, CSS and JavaScript.</p>
+              <a href="#projects">Read more…</a>
+            </article>
+
+            <article class="card" role="listitem">
+              <div class="img-wrap">
+                <svg class="icon" viewBox="0 0 600 360" role="img" aria-labelledby="svg-design">
+                  <title id="svg-design">Sketchbook with UI layouts</title>
+                  <rect width="100%" height="100%" fill="#fff7ed"></rect>
+                  <text x="300" y="160" text-anchor="middle" font-size="32" fill="#264653" font-family="Poppins">Design</text>
+                </svg>
+              </div>
+              <h3>UI / UX</h3>
+              <p>Design systems, wireframes and accessible interactions following best practices.</p>
+              <a href="#about">About my process…</a>
+            </article>
+
+            <article class="card" role="listitem">
+              <div class="img-wrap">
+                <svg class="icon" viewBox="0 0 600 360" role="img" aria-labelledby="svg-data">
+                  <title id="svg-data">Chart showing data visualization</title>
+                  <rect width="100%" height="100%" fill="#eef2ff"></rect>
+                  <text x="300" y="160" text-anchor="middle" font-size="32" fill="#264653" font-family="Poppins">Data</text>
+                </svg>
+              </div>
+              <h3>Data Projects</h3>
+              <p>Analysis and visualization prototypes — Python and storytelling through charts.</p>
+              <a href="#projects">See examples…</a>
+            </article>
+
+          </div>
+        </section>
+      </div>
+    </section>
+
+    <section id="about" class="page" role="region" aria-labelledby="about-title" hidden>
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="#home">Home</a></li>
+            <li aria-current="page">About</li>
+          </ol>
+        </nav>
+
+        <header>
+          <h1 id="about-title">About Me</h1>
+          <p>I am a Computer Science student at Satbayev University (Almaty). I enjoy building user-centered websites and learning new technologies.</p>
+        </header>
+
+        <div class="grid" style="margin-top:1rem">
+          <article style="background:#fff;padding:1rem;border-radius:10px;box-shadow:0 6px 18px rgba(10,10,10,0.04)">
+            <h2>Background</h2>
+            <p>I study web development, discrete mathematics and data structures. I have experience creating small projects using HTML, CSS and JavaScript. I also explore UI/UX and data visualization.</p>
+
+            <h3>Education</h3>
+            <p>Satbayev University — BSc Computer Science (Scholarship recipient)</p>
+
+            <h3>Interests</h3>
+            <ul>
+              <li>Frontend development</li>
+              <li>Accessibility</li>
+              <li>Data visualization</li>
+              <li>Design systems</li>
+            </ul>
+          </article>
+
+          <aside style="background:#fff;padding:1rem;border-radius:10px;box-shadow:0 6px 18px rgba(10,10,10,0.04)">
+            <h2>Skills</h2>
+            <ul>
+              <li>HTML / CSS / JavaScript</li>
+              <li>Python, Java, C++</li>
+              <li>Responsive & accessible design</li>
+              <li>Figma / UI design basics</li>
+            </ul>
+
+            <h2>Contact</h2>
+            <p>Email: <a href="mailto:audullahallmamun@gmail.com">audullahallmamun@gmail.com</a></p>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+   
+    <section id="projects" class="page" role="region" aria-labelledby="projects-title" hidden>
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="#home">Home</a></li>
+            <li aria-current="page">Projects</li>
+          </ol>
+        </nav>
+
+        <header>
+          <h1 id="projects-title">Projects</h1>
+          <p>Selected projects showcasing web, data and app work.</p>
+        </header>
+
+        <section class="grid" aria-label="Projects gallery" style="margin-top:1rem">
+
+          <article class="card" aria-labelledby="p1-title">
+            <!-- responsive - same inline svg scales; include role & title for accessibility -->
+            <div class="img-wrap">
+              <svg class="icon" viewBox="0 0 600 360" role="img" aria-labelledby="p1-img">
+                <title id="p1-img">Portfolio website screenshot</title>
+                <rect width="100%" height="100%" fill="#fff7ed"></rect>
+                <text x="300" y="180" text-anchor="middle" font-size="28" fill="#264653">Portfolio</text>
+              </svg>
+            </div>
+            <h2 id="p1-title">Portfolio Website</h2>
+            <p>A responsive portfolio built with semantic HTML, accessible components and CSS variables.</p>
+            <a href="#projects">Read more…</a>
+          </article>
+
+          <article class="card" aria-labelledby="p2-title">
+            <div class="img-wrap">
+              <svg class="icon" viewBox="0 0 600 360" role="img" aria-labelledby="p2-img">
+                <title id="p2-img">Data analysis charts</title>
+                <rect width="100%" height="100%" fill="#eefaf7"></rect>
+                <text x="300" y="180" text-anchor="middle" font-size="28" fill="#264653">Data</text>
+              </svg>
+            </div>
+            <h2 id="p2-title">Data Analysis</h2>
+            <p>Climate dataset analysis, cleaning and visualization using Python and charts.</p>
+            <a href="#projects">Read more…</a>
+          </article>
+
+          <article class="card" aria-labelledby="p3-title">
+            <div class="img-wrap">
+              <svg class="icon" viewBox="0 0 600 360" role="img" aria-labelledby="p3-img">
+                <title id="p3-img">Java desktop application screenshot</title>
+                <rect width="100%" height="100%" fill="#eef2ff"></rect>
+                <text x="300" y="180" text-anchor="middle" font-size="28" fill="#264653">Java App</text>
+              </svg>
+            </div>
+            <h2 id="p3-title">Java App</h2>
+            <p>Desktop application for managing personal expenses (swing/javaFX prototypes).</p>
+            <a href="#projects">Read more…</a>
+          </article>
+
+        </section>
+      </div>
+    </section>
+
+    
+    <section id="blog" class="page" role="region" aria-labelledby="blog-title" hidden>
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="#home">Home</a></li>
+            <li aria-current="page">Blog</li>
+          </ol>
+        </nav>
+
+        <header>
+          <h1 id="blog-title">Blog</h1>
+          <p>Notes and short posts about development, accessibility and optimization.</p>
+        </header>
+
+        <section style="margin-top:1rem">
+          <article class="post">
+            <h2>How I optimized images for the web</h2>
+            <p class="post-meta">Sep 1, 2025 — 4 min read</p>
+            <p>Short intro about compressing and serving responsive images (srcset, picture, modern formats).</p>
+            <a href="#blog">Read full post</a>
+          </article>
+
+          <article class="post">
+            <h2>Building accessible forms</h2>
+            <p class="post-meta">Aug 10, 2025 — 6 min read</p>
+            <p>Lessons learned implementing accessible forms with clear labels, aria and HTML5 validation.</p>
+            <a href="#blog">Read full post</a>
+          </article>
+        </section>
+
+        <section class="table-section" aria-labelledby="recent-posts" style="margin-top:1rem">
+          <h2 id="recent-posts">Recent posts</h2>
+          <div class="table-wrap">
+            <table>
+              <caption>Recent published posts</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Date</th>
+                  <th scope="col">Title</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Read</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td data-label="Date">Sep 1, 2025</td>
+                  <td data-label="Title">How I optimized images for the web</td>
+                  <td data-label="Category">Performance</td>
+                  <td data-label="Read"><a href="#">Read</a></td>
+                </tr>
+                <tr>
+                  <td data-label="Date">Aug 10, 2025</td>
+                  <td data-label="Title">Building accessible forms</td>
+                  <td data-label="Category">Accessibility</td>
+                  <td data-label="Read"><a href="#">Read</a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+    
+    <section id="contact" class="page" role="region" aria-labelledby="contact-title" hidden>
+      <div class="container">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="#home">Home</a></li>
+            <li aria-current="page">Contact</li>
+          </ol>
+        </nav>
+
+        <header>
+          <h1 id="contact-title">Contact</h1>
+          <p>If you'd like to work together, send a message below.</p>
+        </header>
+
+        <form class="contact-form" action="#" method="post" novalidate>
+          
+          <label for="name">Name <span aria-hidden="true">*</span></label>
+          <input id="name" name="name" type="text" required minlength="2" aria-describedby="name-error" placeholder="Your name">
+          <span class="field-error" id="name-error" role="alert" aria-live="polite">Name is required (min 2 characters).</span>
+
+          
+          <label for="email">Email <span aria-hidden="true">*</span></label>
+          <input id="email" name="email" type="email" required aria-describedby="email-error" placeholder="you@example.com">
+          <span class="field-error" id="email-error" role="alert" aria-live="polite">Enter a valid email address.</span>
+
+         
+          <label for="phone">Phone</label>
+          <input id="phone" name="phone" type="tel" placeholder="+7 (777) 123-4567"
+                 pattern="^\+?[0-9\s\-\(\)]{7,20}$" inputmode="tel" aria-describedby="phone-error">
+          <span class="field-error" id="phone-error" role="alert" aria-live="polite">Use digits, spaces and + - ( ) only.</span>
+
+          
+          <label for="subject">Subject</label>
+          <select id="subject" name="subject" aria-describedby="subject-error">
+            <option value="">Choose a subject</option>
+            <option value="project">Project inquiry</option>
+            <option value="job">Job opportunity</option>
+            <option value="other">Other</option>
+          </select>
+          <span class="field-error" id="subject-error" role="alert" aria-live="polite">Select a subject if relevant.</span>
+
+          
+          <label for="message">Message <span aria-hidden="true">*</span></label>
+          <textarea id="message" name="message" required minlength="10" aria-describedby="message-error" placeholder="Tell me about your project..."></textarea>
+          <span class="field-error" id="message-error" role="alert" aria-live="polite">Message must be at least 10 characters.</span>
+
+          
+          <div class="consent">
+            <input id="consent" name="consent" type="checkbox" required aria-describedby="consent-error">
+            <label for="consent">I consent to having this website store my submitted information.</label>
+          </div>
+          <span class="field-error" id="consent-error" role="alert" aria-live="polite">Consent is required to submit.</span>
+
+          <button class="btn" type="submit">Send Message</button>
+        </form>
+      </div>
+    </section>
+
+  </main>
+
+  
+  <footer role="contentinfo">
+    <div class="container footer-inner">
+      <p>&copy; 2025 Mamun. All rights reserved.</p>
+      <nav aria-label="Footer navigation">
+        <ul style="list-style:none;display:flex;gap:0.6rem;margin:0;padding:0">
+          <li><a href="#home">Home</a></li>
+          <li><a href="#projects">Projects</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </nav>
+    </div>
+  </footer>
+
+  <script>
+    // Single-file routing: show/hide sections based on location.hash
+    (function(){
+      const pages = Array.from(document.querySelectorAll('.page'));
+      const navLinks = Array.from(document.querySelectorAll('nav a[href^="#"]'));
+
+      function showPageFromHash(){
+        const hash = location.hash || '#home';
+        const id = hash.replace('#','');
+        let matched = pages.find(p=>p.id===id);
+        if(!matched) matched = document.getElementById('home');
+
+        pages.forEach(p=>{
+          if(p===matched){
+            p.hidden = false;
+            p.classList.add('active');
+            // set focus to main heading for screen reader users
+            const heading = p.querySelector('h1, h2');
+            if(heading){
+              heading.setAttribute('tabindex','-1');
+              heading.focus();
+              heading.removeAttribute('tabindex');
+            }
+          } else {
+            p.hidden = true;
+            p.classList.remove('active');
+          }
+        });
+
+        // update aria-current on nav
+        navLinks.forEach(a=>{
+          if(a.getAttribute('href') === '#'+matched.id) a.setAttribute('aria-current','page');
+          else a.removeAttribute('aria-current');
+        });
+      }
+
+      // handle clicks on same-page anchor links to update history and show page without scrolling weirdly
+      document.addEventListener('click', function(e){
+        const a = e.target.closest('a[href^="#"]');
+        if(!a) return;
+        const href = a.getAttribute('href');
+        if(!href.startsWith('#')) return;
+        // allow default for skip link (focus will move), but for page nav we handle
+        if(a.classList.contains('skip-link')) return;
+        e.preventDefault();
+        if(location.hash === href){
+          // same hash -> just show
+          showPageFromHash();
+        } else {
+          history.pushState(null,'',href);
+          showPageFromHash();
+        }
+      }, {capture:false});
+
+      window.addEventListener('popstate', showPageFromHash);
+      window.addEventListener('hashchange', showPageFromHash);
+
+      // initial show
+      showPageFromHash();
+
+    })();
+  </script>
+
+</body>
+</html>
